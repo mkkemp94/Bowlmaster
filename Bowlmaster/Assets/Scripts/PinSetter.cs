@@ -7,7 +7,6 @@ public class PinSetter : MonoBehaviour {
 
     public Text standingDisplay;
     public int lastStandingCount = -1;
-    public float distanceToRaise = 500.0f;
 
     private Ball ball;
     private float lastChangeTime;
@@ -32,18 +31,17 @@ public class PinSetter : MonoBehaviour {
         Debug.Log("Raising pins");
         foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
         {
-            if (pin.IsStanding())
-            {
-                //pin.transform.Translate(new Vector3(0, distanceToRaise, 0));
-                //pin.transform.position = new Vector3(pin.transform.position.x, 40, pin.transform.position.z);
-                //pin.GetComponent<Rigidbody>().isKinematic = true;
-            }
+            pin.RaiseIfStanding();
         }
     }
 
     public void LowerPins()
     {
         Debug.Log("Lowering pins");
+        foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
+        {
+            pin.Lower();
+        }
     }
 
     public void RenewPins()
@@ -109,8 +107,10 @@ public class PinSetter : MonoBehaviour {
         }
     }
 
+    // If pin leaves box collider for pin setter, destroy it
     void OnTriggerExit(Collider other)
     {
+        print(other.name + other.transform.position);
         GameObject thingLeft = other.gameObject;
         if (thingLeft.GetComponent<Pin>()) { 
             Destroy(thingLeft);
