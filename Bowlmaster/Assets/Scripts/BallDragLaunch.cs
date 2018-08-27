@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent (typeof(Ball))]
-public class DragLaunch : MonoBehaviour {
+public class BallDragLaunch : MonoBehaviour {
 
     private Ball ball;
-
     private Vector3 dragStart, dragEnd;
     private float startTime, endTime;
     
@@ -14,14 +13,22 @@ public class DragLaunch : MonoBehaviour {
         ball = GetComponent<Ball>();
 	}
 
-    public void DragStart()
+    /**
+     * Capture the time and position of mouse click and hold.
+     * Used to calculate the velocity ball is launched at.
+     */
+    public void CaptureDragStart()
     {
-        // Capture time & position of drag start / mouse click
         dragStart = Input.mousePosition;
         startTime = Time.time;
     }
 
-    public void DragEnd()
+    /**
+     * Capture the time and position of mouse release.
+     * Used to calculate the velocity ball is launched at.
+     * Also launch the ball.
+     */
+    public void CaptureDragEndAndLaunch()
     {
         // Launch ball
         dragEnd = Input.mousePosition;
@@ -39,12 +46,16 @@ public class DragLaunch : MonoBehaviour {
         ball.Launch(launchVelocity);
     }
 
+    /**
+     * Nudge the ball to either side before launching.
+     */
     public void MoveStart(float xNudge)
     {
         if (ball.inPlay == false)
         {
             ball.transform.Translate(new Vector3(xNudge, 0, 0));
 
+            // Clamp to lane
             Vector3 pos = ball.transform.position;
             pos.x = Mathf.Clamp(transform.position.x, -50, 50);
             ball.transform.position = pos;

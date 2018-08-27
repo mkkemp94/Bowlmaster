@@ -30,6 +30,9 @@ public class Ball : MonoBehaviour {
         audioSource.Play();
     }
 
+    /**
+     * Move ball back to front of lane.
+     */
     public void Reset()
     {
         inPlay = false;

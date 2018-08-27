@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class PinSetter : MonoBehaviour {
 
     public Text standingDisplay;
-    public int lastStandingCount = -1;
+    public int lastStandingCount = -1; // not great. What does -1 mean?
     public GameObject pinset;
 
     private Ball ball;
@@ -23,7 +23,7 @@ public class PinSetter : MonoBehaviour {
 
         if (ballEnteredBox)
         {
-            CheckStandingCount();
+            UpdateStandingCountAndSettle();
         }
 	}
 
@@ -32,7 +32,6 @@ public class PinSetter : MonoBehaviour {
         Debug.Log("Raising pins");
         foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
         {
-            print(pin.name + " : " + pin.IsStanding());
             pin.RaiseIfStanding();
         }
     }
@@ -52,7 +51,8 @@ public class PinSetter : MonoBehaviour {
         GameObject newPins = Instantiate(pinset);
     }
 
-    void CheckStandingCount()
+    // If enough time has passed since all pins have been standing, settle and return ball.
+    void UpdateStandingCountAndSettle()
     {
         // Update the last standing count
         int currentStandingCount = CountStanding();
@@ -64,7 +64,7 @@ public class PinSetter : MonoBehaviour {
             return;
         }
 
-        float settleTime = 3f; 
+        float settleTime = 3f; // hardcoded bad
 
         // Call PinsHaveSettled()
         if (Time.time - lastChangeTime >= settleTime)
@@ -109,13 +109,26 @@ public class PinSetter : MonoBehaviour {
             standingDisplay.color = Color.red;
         }
     }
-
-    // If pin leaves box collider for pin setter, destroy it
-    void OnTriggerExit(Collider other)
-    {
-        GameObject thingLeft = other.gameObject;
-        if (thingLeft.GetComponent<Pin>()) { 
-            Destroy(thingLeft);
-        }
-    }
 }
+
+
+
+
+// PinSetter
+// >> Call ScoreMaster in PinsSettled()
+// >> Pass how many pins were knocked over
+
+
+// ScoreMaster
+// >> Will have access to the current round (private)
+// >> TurnTaken() will take how many pins were knocked over
+// >> Add score to currentRoundScore
+// >> If totalTurns % 2 != 0 && totalTurns != 21 && score == 10 >> strike
+// >> If totalTurns % 2 == 0 && score == 10 >> spare
+// >> If totalTurns 
+
+
+/// How it wil actually be
+/// ScoreMaster will have an enum called Action with Reset and Tidy items
+/// PinSetter will call ScoreMaster each turn and get back one of these two actions
+/// ScoreMaster will also provide the frames using GetFrames() method
