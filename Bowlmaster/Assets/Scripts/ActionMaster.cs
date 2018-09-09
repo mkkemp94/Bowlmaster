@@ -6,70 +6,172 @@ public class ActionMaster {
 
     public enum Action { Tidy, Reset, EndTurn, EndGame };
     private int[] bowls = new int[21];
-    private int bowl = 1;
+    private int currentBowl = 1;
+    private bool gameIsOver = false;
 
-	public Action Bowl (int pins)
+	public Action Bowl (int pinsKnockedDown)
     {
 
-        if (pins < 0 || pins > 10) { throw new UnityException("Invalid number of pins!"); }
-        if (bowls[bowl-1] + pins > 10 && bowl < 19) { throw new UnityException("Too many pins!"); }
-        
-        // Assign bowl to right spot.
-        bowls[bowl-1] = pins;
+        if (pinsKnockedDown < 0 || pinsKnockedDown > 10) { throw new UnityException("Invalid number of pins!"); }
+        if (gameIsOver) { throw new UnityException("Game already over!"); }
 
-        //for (int i = 1; i <= bowls.Length; i++)
-        //{
-        //    Debug.Log("Bowl #" + i + " = " + bowls[i - 1]);
-        //}
-        
-        // Strike turns 1-9 -> end turn
-        if (pins == 10 && bowl < 19)
+        // Assign bowl to right spot.
+        SetCurrentTurnScore(pinsKnockedDown);
+
+        if (currentBowl < 19)
         {
-            bowl += 2;
-            return Action.EndTurn;
+            // First ball of frame.
+            if (currentBowl % 2 != 0)
+            {
+                // Strike
+                if (GotASrike(pinsKnockedDown))
+                {
+                    currentBowl += 2;
+                    return Action.EndTurn;
+                }
+                else
+                {
+                    currentBowl++;
+                    return Action.Tidy;
+                }
+            }
+
+            // End of frame
+            else
+            {
+                currentBowl++;
+                return Action.EndTurn;
+            }
         }
 
-        // Strike turn 10 frame 1 or 2-> end turn
-        else if (pins == 10 && (bowl == 19 || bowl == 20))
+        else if (currentBowl == 19)
         {
-            bowl += 1;
-            return Action.Reset;
+            // Strike
+            if (GotASrike(pinsKnockedDown))
+            {
+                currentBowl++;
+                return Action.Reset;
+            }
+            else
+            {
+                currentBowl++;
+                return Action.Tidy;
+            }
+        }
 
+        else if (currentBowl == 20)
+        {
+            if (GotASrike(pinsKnockedDown) || (GotASpare(pinsKnockedDown) && pinsKnockedDown != 0))
+            {
+                currentBowl++;
+                return Action.Reset;
+            }
+
+            else if (GetLastTurnsScore() == 10)
+            {
+                currentBowl++;
+                return Action.Tidy;
+            }
+
+            else
+            {
+                gameIsOver = true;
+                return Action.EndGame;
+            }
         }
 
         // Last frame always end game
-        else if (bowl == 21)
+        else
         {
+            gameIsOver = true;
             return Action.EndGame;
         }
 
-        // Strike on turn 10 frame 2
-        else if (bowl == 20 && pins == 10)
-        {
-            return Action.Reset;
-        }
 
-        // Turn 10 frame 2 and spare
-        else if (bowl == 20 && (bowls[bowl - 1] + pins == 10))
-        {
-            bowl += 1;
-            return Action.Reset;
-        }
 
-        // First ball of frame.
-        else if (bowl % 2 != 0)
-        {
-            bowl++;
-            return Action.Tidy;
-        }
+        //// Strike first frame turns 1-9 -> end turn
+        //if (GotAStrike(pinsKnockedDown) && currentBowl % 2 != 0 && currentBowl < 19)
+        //{
+        //    currentBowl += 2;
+        //    return Action.EndTurn;
+        //}
 
-        // End of frame
-        else if (bowl % 2 == 0)
-        {
-            bowl++;
-            return Action.EndTurn;
-        }
+        //// Strike bowl 19 or 20 -> reset
+        //else if (GotAStrike(pinsKnockedDown) && (currentBowl == 19 || currentBowl == 20))
+        //{
+        //    currentBowl += 1;
+        //    return Action.Reset;
+        //}
+
+        //// Strike turn 19, not 10 on turn 20
+        //else if (currentBowl == 20 && pinsKnockedDown < 10 && GetLastTurnsScore() == 10)
+        //{
+        //    currentBowl += 1;
+        //    return Action.Tidy;
+        //}
+
+        //// Turn 10 frame 2 and spare
+        //else if (currentBowl == 20 && GotASpare(pinsKnockedDown))
+        //{
+        //    currentBowl += 1;
+        //    return Action.Reset;
+        //}
+
+        //// Turn 20 no strike or spare
+        //else if (currentBowl == 20)
+        //{
+        //    gameIsOver = true;
+        //    return Action.EndGame;
+        //}
+
+        //// Last frame always end game
+        //else if (currentBowl == 21)
+        //{
+        //    gameIsOver = true;
+        //    return Action.EndGame;
+        //}
+
+        //// First ball of frame.
+        //else if (currentBowl % 2 != 0)
+        //{
+        //    currentBowl++;
+        //    return Action.Tidy;
+        //}
+
+        //// End of frame
+        //else if (currentBowl % 2 == 0)
+        //{
+        //    currentBowl++;
+        //    return Action.EndTurn;
+        //}
 
         throw new UnityException("Not sure what action to return!");
+    }
+
+    // Insert current turn into the scoreboard.
+    private void SetCurrentTurnScore(int pinsKnockedDown)
+    {
+        bowls[currentBowl-1] = pinsKnockedDown;
+    }
+
+    // Get last turn's score.
+    private int GetLastTurnsScore()
+    {
+        return bowls[currentBowl-1 - 1];
+    }
+    
+    public int GetCurrentBowl()
+    {
+        return currentBowl;
+    }
+
+    private bool GotASpare(int pinsKnockedDown)
+    {
+        return (GetLastTurnsScore() + pinsKnockedDown == 10);
+    }
+
+    private bool GotASrike(int pinsKnockedDown)
+    {
+        return pinsKnockedDown == 10;
     }
 }

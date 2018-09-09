@@ -12,6 +12,7 @@ public class ActionMasterTest
     private ActionMaster.Action endGame = ActionMaster.Action.EndGame;
 
     private ActionMaster actionMaster;
+
     [SetUp]
     public void Setup()
     {
@@ -87,10 +88,10 @@ public class ActionMasterTest
     public void T08_Bowl12StrikesReturnsEndGame()
     {
         // Bowl eleven strikes
-        int preBowlAmount = 19;
-        for (int i = 0; i < preBowlAmount; i++)
+        int[] bowls = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+        foreach (int bowl in bowls)
         {
-            actionMaster.Bowl(10);
+            actionMaster.Bowl(bowl);
         }
 
         // Twelfth strike should end game
@@ -98,16 +99,18 @@ public class ActionMasterTest
     }
 
     [Test]
-    public void T09_BowlAll5sReturnsEndTurnOnTurn20BecauseSpare()
+    public void T09_Bowl7Turn19Then3Turn20ReturnsResetBecauseSpare()
     {
         // Bowl 19 fives
-        int[] bowls = new int[19];
+        int[] bowls = new int[18];
         foreach (int bowl in bowls) { 
             actionMaster.Bowl(5);
         }
 
+        actionMaster.Bowl(7);
+
         // Bowl 20 should return reset -- because it is a spare
-        Assert.AreEqual(reset, actionMaster.Bowl(5));
+        Assert.AreEqual(reset, actionMaster.Bowl(3));
     }
 
     [Test]
@@ -220,5 +223,129 @@ public class ActionMasterTest
 
         // Then roll 10. Should end turn.
         Assert.AreEqual(endTurn, actionMaster.Bowl(0));
+    }
+
+    [Test]
+    public void T18_YoutubeRollsEndInEndGame()
+    {
+        int[] rolls = { 8,2, 7,3, 3,4, 10, 2,8, 10, 10, 8,0, 10, 8,2 }; // 10 turns... awarded final roll
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        // Then roll 9. Should end game.
+        Assert.AreEqual(endGame, actionMaster.Bowl(9));
+    }
+
+    [Test]
+    public void T19_DarylStrikeTurn19AndNot10Roll20ShouldReturnTidy()
+    {
+        int[] rolls = { 8,2, 7,3, 3,4, 10, 2,8, 10, 10, 8,0, 10, 10 }; // strike turn 19
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        // Then roll not 10. Should return tidy.
+        Assert.AreEqual(tidy, actionMaster.Bowl(2));
+    }
+
+    [Test]
+    public void T20_StrikeTurn19And0Roll20ShouldReturnTidy()
+    {
+        int[] rolls = { 8, 2, 7, 3, 3, 4, 10, 2, 8, 10, 10, 8, 0, 10, 10 }; // strike turn 19
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        // Then roll not 10. Should return tidy.
+        Assert.AreEqual(tidy, actionMaster.Bowl(0));
+    }
+
+    [Test]
+    public void T21_KnockDown10PinsOnSecondBowlInFrameShouldIncrementBowlBy1()
+    {
+        int[] rolls = { 0,10, 0,10, 0,10, 0,10, 0,10, 0,10, 0,10, 0,10, 0,0, 0 };
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        Assert.AreEqual(20, actionMaster.GetCurrentBowl());
+
+        // Then roll 0. Should end game.
+        Assert.AreEqual(endGame, actionMaster.Bowl(0));
+    }
+
+    [Test]
+    public void T22_Bowl13StrikesThrowsExceptionGameAlreadyOver()
+    {
+        int[] rolls = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        Debug.Log(actionMaster.GetCurrentBowl());
+
+        try {
+            actionMaster.Bowl(10);
+            throw new Exception("Test should have failed!");
+        }
+        catch (UnityException e)
+        {
+            Assert.AreEqual("Game already over!", e.Message);
+        }
+    }
+
+    [Test]
+    public void T23_CurrentBowlStartsAt1()
+    {
+        Assert.AreEqual(actionMaster.GetCurrentBowl(), 1);
+    }
+
+    [Test]
+    public void T24_CurrentBowlIncreasesBy2WithStrikeFirstFrame()
+    {
+        actionMaster.Bowl(10);
+        Assert.AreEqual(actionMaster.GetCurrentBowl(), 3);
+    }
+
+    [Test]
+    public void T25_CurrentBowlIncreasesBy1WithStrikeSecondFrame()
+    {
+        actionMaster.Bowl(0);
+        actionMaster.Bowl(10);
+        Assert.AreEqual(actionMaster.GetCurrentBowl(), 3);
+    }
+
+    [Test]
+    public void T26_0Then10Then5Then1ShouldEndTurn()
+    {
+        int[] rolls = { 0, 10, 5 };
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        // 1 should now return end turn -- second ball of second frame
+        Assert.AreEqual(endTurn, actionMaster.Bowl(1));
+    }
+
+    [Test]
+    public void T27_Dondi10thFrameTurkey()
+    {
+        int[] rolls = { 1,1, 1,1, 1,1, 1,1, 1,1, 1,1, 1,1, 1,1, 1,1 };
+        foreach (int roll in rolls)
+        {
+            actionMaster.Bowl(roll);
+        }
+
+        Assert.AreEqual(reset, actionMaster.Bowl(10));
+        Assert.AreEqual(reset, actionMaster.Bowl(10));
+        Assert.AreEqual(endGame, actionMaster.Bowl(10));
     }
 }

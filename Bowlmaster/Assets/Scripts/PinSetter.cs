@@ -11,11 +11,15 @@ public class PinSetter : MonoBehaviour {
 
     private Ball ball;
     private float lastChangeTime;
+    private int lastSettledCount = 10;
     private bool ballEnteredBox = false;
+    private ActionMaster actionMaster = new ActionMaster();
+    private Animator animator;
 
     private void Start()
     {
         ball = GameObject.FindObjectOfType<Ball>();
+        animator = GetComponent<Animator>();
     }
 
     void Update () {
@@ -29,7 +33,6 @@ public class PinSetter : MonoBehaviour {
 
     public void RaisePins()
     {
-        Debug.Log("Raising pins");
         foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
         {
             pin.RaiseIfStanding();
@@ -38,7 +41,6 @@ public class PinSetter : MonoBehaviour {
 
     public void LowerPins()
     {
-        Debug.Log("Lowering pins");
         foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
         {
             pin.Lower();
@@ -47,7 +49,6 @@ public class PinSetter : MonoBehaviour {
 
     public void RenewPins()
     {
-        Debug.Log("Renewing pins");
         GameObject newPins = Instantiate(pinset);
     }
 
@@ -74,6 +75,33 @@ public class PinSetter : MonoBehaviour {
     }
 
     void PinsHaveSettled()
+    {
+        PerformAction();
+        ResetPlayspace();
+    }
+
+    void PerformAction()
+    {
+        int pinFall = lastSettledCount - CountStanding();
+        lastSettledCount = CountStanding();
+
+        ActionMaster.Action action = actionMaster.Bowl(pinFall);
+        Debug.Log("Action to take: " + action);
+        switch (action)
+        {
+            case ActionMaster.Action.Tidy:
+                animator.SetTrigger("tidyTrigger");
+                break;
+            case ActionMaster.Action.EndTurn:
+            case ActionMaster.Action.Reset:
+                animator.SetTrigger("resetTrigger");
+                break;
+            case ActionMaster.Action.EndGame:
+                throw new UnityException("Don't know how to end game!");
+        }
+    }
+
+    private void ResetPlayspace()
     {
         ball.Reset();
         lastStandingCount = -1; // Indicates pins have settled, and ball back in box.
