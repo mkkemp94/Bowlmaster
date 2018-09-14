@@ -5,7 +5,10 @@ using UnityEngine;
 public class ActionMaster {
 
     public enum Action { Tidy, Reset, EndTurn, EndGame };
+
+    // This should change
     private int[] bowls = new int[21];
+
     private int currentBowl = 1;
     private bool gameIsOver = false;
 
@@ -27,6 +30,8 @@ public class ActionMaster {
                 if (GotASrike(pinsKnockedDown))
                 {
                     currentBowl += 2;
+
+                    // Return action to pinsetter
                     return Action.EndTurn;
                 }
                 else

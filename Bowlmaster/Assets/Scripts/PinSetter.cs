@@ -6,31 +6,41 @@ using UnityEngine.UI;
 public class PinSetter : MonoBehaviour {
 
     public Text standingDisplay;
-    public int lastStandingCount = -1; // not great. What does -1 mean?
     public GameObject pinset;
 
-    private Ball ball;
+    private int lastStandingCount = -1; 
+    
     private float lastChangeTime;
     private int lastSettledCount = 10;
-    private bool ballEnteredBox = false;
-    private ActionMaster actionMaster = new ActionMaster();
+    public bool ballOutOfPlay = false;
+
+    private Ball ball;
     private Animator animator;
+    private ActionMaster actionMaster;
 
     private void Start()
     {
         ball = GameObject.FindObjectOfType<Ball>();
         animator = GetComponent<Animator>();
+        actionMaster = new ActionMaster();
     }
 
     void Update () {
         standingDisplay.text = CountStanding().ToString();
 
-        if (ballEnteredBox)
+        if (ballOutOfPlay)
         {
+            standingDisplay.color = Color.red;
             UpdateStandingCountAndSettle();
         }
 	}
 
+    public void SetBallOutOfPlay()
+    {
+        ballOutOfPlay = true;
+    }
+
+    // Reply from animator
     public void RaisePins()
     {
         foreach (Pin pin in GameObject.FindObjectsOfType<Pin>())
@@ -82,19 +92,23 @@ public class PinSetter : MonoBehaviour {
 
     void PerformAction()
     {
-        int pinFall = lastSettledCount - CountStanding();
-        lastSettledCount = CountStanding();
+        int standing = CountStanding();
+        int pinFall = lastSettledCount - standing;
+        lastSettledCount = standing;
 
+        // Send pinfall number to action master
         ActionMaster.Action action = actionMaster.Bowl(pinFall);
         Debug.Log("Action to take: " + action);
         switch (action)
         {
+            // Pass action to animator
             case ActionMaster.Action.Tidy:
                 animator.SetTrigger("tidyTrigger");
                 break;
             case ActionMaster.Action.EndTurn:
             case ActionMaster.Action.Reset:
                 animator.SetTrigger("resetTrigger");
+                lastSettledCount = 10;
                 break;
             case ActionMaster.Action.EndGame:
                 throw new UnityException("Don't know how to end game!");
@@ -103,9 +117,10 @@ public class PinSetter : MonoBehaviour {
 
     private void ResetPlayspace()
     {
+        // Reset ball
         ball.Reset();
         lastStandingCount = -1; // Indicates pins have settled, and ball back in box.
-        ballEnteredBox = false;
+        ballOutOfPlay = false;
         standingDisplay.color = Color.green;
     }
 
@@ -124,18 +139,6 @@ public class PinSetter : MonoBehaviour {
 
         // Return the number of standing pins
         return countStanding;
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        GameObject thingHit = other.gameObject;
-
-        // Ball enters play box
-        if (thingHit.GetComponent<Ball>())
-        {
-            ballEnteredBox = true;
-            standingDisplay.color = Color.red;
-        }
     }
 }
 
