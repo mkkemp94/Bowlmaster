@@ -14,6 +14,11 @@ public class Pin : MonoBehaviour {
         rigidBody = GetComponent<Rigidbody>();
     }
 
+    public Rigidbody getRigidbody()
+    {
+        return rigidBody;
+    }
+
     public bool IsStanding()
     {
         Vector3 rotationInEuler = transform.rotation.eulerAngles;
@@ -41,9 +46,11 @@ public class Pin : MonoBehaviour {
         if (this.IsStanding())
         { 
             transform.Translate(new Vector3(0, distanceToRaise, 0), Space.World);
+
             //pin.transform.position = new Vector3(pin.transform.position.x, pin.transform.position.y + distanceToRaise, pin.transform.position.z);
             //transform.position += new Vector3(0, distanceToRaise, 0);
             rigidBody.useGravity = false;
+            transform.rotation = Quaternion.Euler(270, 0, 0);
         }
     }
 

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ActionMaster {
 
+    // Action enum
     public enum Action { Tidy, Reset, EndTurn, EndGame };
 
     // This should change
@@ -12,7 +13,20 @@ public class ActionMaster {
     private int currentBowl = 1;
     private bool gameIsOver = false;
 
-	public Action Bowl (int pinsKnockedDown)
+    public static Action NextAction (List<int> pinFalls)
+    {
+        ActionMaster actionMaster = new ActionMaster();
+        Action action = new Action();
+
+        foreach (int pinFall in pinFalls)
+        {
+            action = actionMaster.Bowl(pinFall);
+        }
+
+        return action;
+    }
+
+	private Action Bowl (int pinsKnockedDown)
     {
 
         if (pinsKnockedDown < 0 || pinsKnockedDown > 10) { throw new UnityException("Invalid number of pins!"); }

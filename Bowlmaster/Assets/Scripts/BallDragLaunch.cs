@@ -19,8 +19,11 @@ public class BallDragLaunch : MonoBehaviour {
      */
     public void CaptureDragStart()
     {
-        dragStart = Input.mousePosition;
-        startTime = Time.time;
+        if (!ball.inPlay)
+        {
+            dragStart = Input.mousePosition;
+            startTime = Time.time;
+        }
     }
 
     /**
@@ -30,20 +33,23 @@ public class BallDragLaunch : MonoBehaviour {
      */
     public void CaptureDragEndAndLaunch()
     {
-        // Launch ball
-        dragEnd = Input.mousePosition;
-        endTime = Time.time;
+        if (!ball.inPlay)
+        {
+            // Launch ball
+            dragEnd = Input.mousePosition;
+            endTime = Time.time;
 
-        float dragDuration = endTime - startTime;
+            float dragDuration = endTime - startTime;
 
-        float distanceX = dragEnd.x - dragStart.x;
-        float distanceY = dragEnd.y - dragStart.y;
+            float distanceX = dragEnd.x - dragStart.x;
+            float distanceY = dragEnd.y - dragStart.y;
 
-        float launchSpeedX = distanceX / dragDuration;
-        float launchSpeedZ = distanceY / dragDuration; // translation from 2d screen (x, y) to 3d world (z)
+            float launchSpeedX = distanceX / dragDuration;
+            float launchSpeedZ = distanceY / dragDuration; // translation from 2d screen (x, y) to 3d world (z)
 
-        Vector3 launchVelocity = new Vector3(launchSpeedX, 0, launchSpeedZ);
-        ball.Launch(launchVelocity);
+            Vector3 launchVelocity = new Vector3(launchSpeedX, 0, launchSpeedZ);
+            ball.Launch(launchVelocity);
+        }
     }
 
     /**

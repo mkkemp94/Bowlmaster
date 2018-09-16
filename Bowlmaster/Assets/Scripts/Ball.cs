@@ -24,10 +24,13 @@ public class Ball : MonoBehaviour {
 
     public void Launch(Vector3 velocity)
     {
-        inPlay = true;
-        rigidBody.useGravity = true;
-        rigidBody.velocity = velocity; 
-        audioSource.Play();
+        if (!inPlay)
+        {
+            inPlay = true;
+            rigidBody.useGravity = true;
+            rigidBody.velocity = velocity;
+            audioSource.Play();
+        }
     }
 
     /**
@@ -36,6 +39,7 @@ public class Ball : MonoBehaviour {
     public void Reset()
     {
         inPlay = false;
+        transform.rotation = Quaternion.identity;
         transform.position = initialPosition;
         rigidBody.velocity = Vector3.zero;
         rigidBody.angularVelocity = Vector3.zero;
