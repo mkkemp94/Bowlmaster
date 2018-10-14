@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic; // for lists
 using UnityEngine;
 
-public class ScoreMaster {
+// Static == stateless
+public static class ScoreMaster {
 
     /** 
       * Keep calling score frames

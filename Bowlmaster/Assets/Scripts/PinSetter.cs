@@ -15,20 +15,20 @@ public class PinSetter : MonoBehaviour {
         pinCounter = GameObject.FindObjectOfType<PinCounter>();
     }
 
-    public void PerformAction(ActionMaster.Action action)
+    public void PerformAction(ActionMaster_OLD.Action action)
     {
         switch (action)
         {
             // Pass action to animator
-            case ActionMaster.Action.Tidy:
+            case ActionMaster_OLD.Action.Tidy:
                 TidyPins();
                 break;
-            case ActionMaster.Action.EndTurn:
-            case ActionMaster.Action.Reset:
+            case ActionMaster_OLD.Action.EndTurn:
+            case ActionMaster_OLD.Action.Reset:
                 ResetPins();
                 pinCounter.Reset();
                 break;
-            case ActionMaster.Action.EndGame:
+            case ActionMaster_OLD.Action.EndGame:
                 throw new UnityException("Don't know how to end game!");
         }
     }

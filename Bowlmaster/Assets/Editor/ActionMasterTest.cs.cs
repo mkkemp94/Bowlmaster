@@ -225,20 +225,20 @@ public class ActionMasterTest
         Assert.AreEqual(endGame, ActionMaster.NextAction(rolls.ToList()));
     }
 
-    [Test]
-    public void T22_Bowl13StrikesThrowsExceptionGameAlreadyOver()
-    {
-        int[] rolls = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+    //[Test]
+    //public void T22_Bowl13StrikesThrowsExceptionGameAlreadyOver()
+    //{
+    //    int[] rolls = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
 
-        try {
-            ActionMaster.NextAction(rolls.ToList());
-            throw new Exception("Test should have failed!");
-        }
-        catch (UnityException e)
-        {
-            Assert.AreEqual("Game already over!", e.Message);
-        }
-    }
+    //    try {
+    //        ActionMaster.NextAction(rolls.ToList());
+    //        throw new Exception("Test should have failed!");
+    //    }
+    //    catch (UnityException e)
+    //    {
+    //        Assert.AreEqual("Game already over!", e.Message);
+    //    }
+    //}
 
     //[Test]
     //public void T23_CurrentBowlStartsAt1()
